@@ -1,87 +1,104 @@
 package dominio;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.*;
-/**
- * Esta clase es responsable de leer el tablero de un
- * fichero en forma de ceros y unos, ir transitando de
- * estados e ir mostrando dichos estados.
- */
-public class Tablero{
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.Scanner;
+
+public class Tablero {
     private static int DIMENSION = 30;
-    private int[][] estadoActual; //matriz que representa el estado actual.
-    private int[][] estadoSiguiente = new int[DIMENSION][DIMENSION]; // Matriz que representa el estado siguiente.
+    private int estadoActual[][] = new int[DIMENSION + 2][DIMENSION + 2];
+    private int estadoSiguiente[][] = new int[DIMENSION + 2][DIMENSION + 2];
 
-/********************************************************
- * Lee el estado inicial de un fichero llamado ‘matriz‘.
- ********************************************************/
+    public void leerEstadoActual() throws FileNotFoundException, IOException {
+        FileReader f = new FileReader("matriz.txt");
 
-public void leerEstadoActual() throws FileNotFoundException {
-//leer estado actual
-int[][] estadoActual = new int[DIMENSION][DIMENSION];
-    int i = 0;
-    int j = 0;
-
-        File file = new File("matriz.txt");
-        Scanner sc = new Scanner(file);
-        while (sc.hasNextLine()) {
-            String line = sc.nextLine();
-            for (int k = 0; k < line.length(); k++) {
-                estadoActual[i][j] = Integer.parseInt(String.valueOf(line.charAt(k)));
-                j++;
+        for (int i = 0; i <= DIMENSION + 1; i++) {
+            for (int j = 0; j <= DIMENSION + 1; j++) {
+                estadoActual[i][j] = 0;
             }
-            i++;
-            j = 0;
+        }
 
-        sc.close();}
+        for (int i = 1; i <= DIMENSION; i++) {
 
-    this.estadoActual = estadoActual;
-    this.estadoSiguiente = estadoActual;
+            for (int j = 1; j <= DIMENSION; j++) {
+                estadoActual[i][j] = f.read()== 49?1:0;
+            }
 
-}
-// La secuencia de ceros y unos del fichero es guardada en ‘estadoActual‘ y, utilizando las reglas del juego
-// de la vida, se insertan los ceros y unos correspondientes en ‘estadoSiguiente‘.
-
-    /********************************************************
-     * Genera un estado inicial aleatorio. Para cada celda
-     * genera un número aleatorio en el intervalo [0, 1). Si
-     * el número es menor que 0,5, entonces la celda está
-     * inicialmente viva. En caso contrario, está muerta.
-     *******************************************************/
-
-    public void generarEstadoActualPorMontecarlo(){
-    //generar estado actual por montecarlo
-    int[][] estadoActual = new int[DIMENSION][DIMENSION];
-    int i = 0;
-    int j = 0;
-    Random random = new Random();
-    for (i = 0; i < DIMENSION; i++) {
-        for (j = 0; j < DIMENSION; j++) {
-            estadoActual[i][j] = random.nextInt(2);
+            f.read();
+            f.read();
         }
 
 
 
     }
-// La secuencia de ceros y unos generada es guardada en ‘estadoActual‘ y, utilizando las reglas del juego
-// de la vida, se insertan los ceros y unos correspondientes en ‘estadoSiguiente‘.
 
-    /********************************************************
-     * Transita al estado siguiente según las reglas del
-     * juego de la vida.
-     ********************************************************/
+    public void generarEstadoActualPorMontecarlo() {
+        double numero;
+        for (int i = 1; i <= DIMENSION; i++) {
+            for (int j = 1; j <= DIMENSION; j++) {
+                numero =  (Math.random() );
+                if (numero < 0.7) {
+                    estadoActual[i][j] = 0;
+                } else {
+                    estadoActual[i][j] = 1;
+                }
 
-    public void transitarAlEstadoSiguiente(){}
-// La variable ‘estadoActual‘ pasa a tener el contenido de ‘estadoSiguiente‘ y, éste útimo atributo pasar a
-// reflejar el siguiente estado.
-
-    /*******************************************************
-     * Devuelve, en modo texto, el estado actual.
-     * @return el estado actual.
-     *******************************************************/
-
-    @Override
-    public String toString(){
-        return ""; // Esta línea hay que modificarla.
+            }
+        }
     }
+
+
+    private int vecinos(int x, int y){
+        int c=0;
+        for(int i=-1;i<=1;i++){
+            for(int j=-1;j<=1;j++){
+                if(estadoActual[x+i][y+j]==1){
+                    c++;
+                }
+            }
+        }
+        return c;
+    }
+    public void transitarAlEstadoSiguiente() {
+        int vecinos;
+        for (int x = 0; x > DIMENSION + 1; x++) {
+            for (int y = 0; y > DIMENSION + 1; y++) {
+                vecinos = vecinos(x, y);
+                if (estadoActual[x][y] == 1) {
+                    if (vecinos == 2 || vecinos == 3) {
+                        estadoSiguiente[x][y] = 1;
+                    } else {
+                        estadoSiguiente[x][y] = 0;
+                    }
+                } else {
+                    if (vecinos == 3) {
+                        estadoSiguiente[x][y] = 1;
+                    } else {
+                        estadoSiguiente[x][y] = 0;
+                    }
+                }
+            }
+
+        }
+        estadoActual = estadoSiguiente;
+
+    }
+
+    public String toString() {
+        String cadena = "";
+        for (int i = 1; i <= DIMENSION; i++) {
+            for (int j = 1; j <= DIMENSION; j++) {
+                if (estadoActual[i][j] == 1) {
+                    cadena += "1";
+                } else {
+                    cadena += "0";              }
+            }
+            cadena += "\n";
+
+        }
+        return cadena;
+    }
+
+
 }
